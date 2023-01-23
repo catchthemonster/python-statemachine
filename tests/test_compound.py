@@ -11,8 +11,8 @@ def compound_engine_cls():
             off = State("Off", initial=True)
             on = State("On")
 
-            turn_off = on.to(off)
             turn_on = off.to(on)
+            turn_off = on.to(off)
 
     return TestMachine
 
@@ -26,8 +26,8 @@ class TestNestedDeclarations:
 
     def test_list_children_states(self, compound_engine_cls):
         sm = compound_engine_cls()
-        assert [s.id for s in sm.engine.children] == ["off", "on"]
+        assert [s.id for s in sm.engine.substates] == ["off", "on"]
 
     def test_list_events(self, compound_engine_cls):
         sm = compound_engine_cls()
-        assert [e.name for e in sm.events] == ["turn_off", "turn_on"]
+        assert [e.name for e in sm.events] == ["turn_on", "turn_off"]

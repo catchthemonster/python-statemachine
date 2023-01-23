@@ -82,9 +82,8 @@ class StateMachineMetaclass(type):
         if not has_states:
             raise InvalidDefinition(_("There are no states."))
 
-        # TODO: Validate no events if has nested states
-        # if not has_events:
-        #     raise InvalidDefinition(_("There are no events."))
+        if not has_events:
+            raise InvalidDefinition(_("There are no events."))
 
         cls._check_disconnected_state()
 
@@ -137,10 +136,11 @@ class StateMachineMetaclass(type):
 
     def add_state(cls, id, state: State):
         state._set_id(id)
-        cls.states.append(state)
-        cls.states_map[state.value] = state
-        if not hasattr(cls, id):
-            setattr(cls, id, state)
+        if not state.parent:
+            cls.states.append(state)
+            cls.states_map[state.value] = state
+            if not hasattr(cls, id):
+                setattr(cls, id, state)
 
         # also register all events associated directly with transitions
         for event in state.transitions.unique_events:

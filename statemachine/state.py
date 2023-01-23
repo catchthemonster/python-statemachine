@@ -1,5 +1,6 @@
 from copy import deepcopy
 from typing import Any
+from typing import TypeAlias
 
 from .callbacks import Callbacks
 from .exceptions import StateMachineError
@@ -9,19 +10,22 @@ from .transition_list import TransitionList
 
 
 class NestedStateFactory(type):
-    def __new__(cls, classname, bases, attrs, name=None, initial=False, parallel=False):
+    def __new__(  # type: ignore [misc]
+        cls, classname, bases, attrs, name=None, initial=False, parallel=False
+    ) -> "State":
 
         if not bases:
-            return super().__new__(cls, classname, bases, attrs)
+            return super().__new__(cls, classname, bases, attrs)  # type: ignore [return-value]
 
         substates = []
         for key, value in attrs.items():
-            if not isinstance(value, State):
-                continue
-            value._set_id(key)
-            substates.append(value)
+            if isinstance(value, State):
+                value._set_id(key)
+                substates.append(value)
+            if isinstance(value, TransitionList):
+                value.add_event(key)
 
-        return State(name, initial=initial, parallel=parallel, substates=substates)
+        return State(name=name, initial=initial, parallel=parallel, substates=substates)
 
 
 class NestedStateBuilder(metaclass=NestedStateFactory):
@@ -107,7 +111,7 @@ class State:
 
     """
 
-    Builder = NestedStateBuilder
+    Builder: TypeAlias = NestedStateBuilder
 
     def __init__(
         self,
@@ -115,20 +119,20 @@ class State:
         value: Any = None,
         initial: bool = False,
         final: bool = False,
-        parallel=False,
-        substates=None,
+        parallel: bool = False,
+        substates: Any = None,
         enter: Any = None,
         exit: Any = None,
     ):
         self.name = name
         self.value = value
         self.parallel = parallel
-        self.parent: "State" = None
         self.substates = substates or []
         self._initial = initial
         self._final = final
         self._id: str = ""
         self._storage: str = ""
+        self.parent: "State" = None
         self.transitions = TransitionList()
         self.enter = Callbacks().add(enter)
         self.exit = Callbacks().add(exit)
@@ -137,6 +141,7 @@ class State:
     def _init_substates(self):
         for substate in self.substates:
             substate.parent = self
+            setattr(self, substate.id, substate)
 
     def __eq__(self, other):
         return (
