@@ -43,15 +43,21 @@ class StateMachineMetaclass(type):
     def _set_special_states(cls):
         if not cls.states:
             return
-        initials = [s for s in cls.states if s.initial and not s.parent]
-        if len(initials) != 1:
+        initials = [s for s in cls.states if s.initial]
+        parallels = [s.id for s in cls.states if s.parallel]
+        root_only_has_parallels = len(cls.states) == len(parallels)
+        if len(initials) != 1 and not root_only_has_parallels:
             raise InvalidDefinition(
                 _(
                     "There should be one and only one initial state. "
                     "Your currently have these: {0}"
                 ).format(", ".join(s.id for s in initials))
             )
-        cls.initial_state = initials[0]
+        if root_only_has_parallels:
+            # TODO: Temp, whe should fix initial, and current state design
+            cls.initial_state = cls.states[0]
+        else:
+            cls.initial_state = initials[0]
         cls.final_states = [state for state in cls.states if state.final]
 
     def _disconnected_states(cls, starting_state):

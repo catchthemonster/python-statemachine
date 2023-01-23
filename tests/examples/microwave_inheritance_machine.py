@@ -38,11 +38,11 @@ from statemachine import StateMachine
 
 
 class MicroWave(StateMachine):
-    class oven(State.Builder, name="Oven", initial=True, parallel=True):
-        class engine(State.Builder, name="Engine"):
+    class oven(State.Builder, name="Microwave oven", parallel=True):
+        class engine(State.Builder):
             off = State("Off", initial=True)
 
-            class on(State.Builder, name="On"):
+            class on(State.Builder):
                 idle = State("Idle", initial=True)
                 cooking = State("Cooking")
 
@@ -55,9 +55,9 @@ class MicroWave(StateMachine):
             turn_on = off.to(on)
             on.to(off, cond="cook_time_is_over")  # eventless transition
 
-        class door(State.Builder, name="Door"):
-            closed = State("Closed", initial=True)
-            open = State("Open")
+        class door(State.Builder):
+            closed = State(initial=True)
+            open = State()
 
             door_open = closed.to(open)
             door_close = open.to(closed)
