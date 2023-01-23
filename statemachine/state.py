@@ -8,6 +8,26 @@ from .transition import Transition
 from .transition_list import TransitionList
 
 
+class NestedStateFactory(type):
+    def __new__(cls, classname, bases, attrs, name=None, initial=False, parallel=False):
+
+        if not bases:
+            return super().__new__(cls, classname, bases, attrs)
+
+        substates = []
+        for key, value in attrs.items():
+            if not isinstance(value, State):
+                continue
+            value._set_id(key)
+            substates.append(value)
+
+        return State(name, initial=initial, parallel=parallel, substates=substates)
+
+
+class NestedStateBuilder(metaclass=NestedStateFactory):
+    pass
+
+
 class State:
     """
     A State in a :ref:`StateMachine` describes a particular behavior of the machine.
@@ -87,17 +107,24 @@ class State:
 
     """
 
+    Builder = NestedStateBuilder
+
     def __init__(
         self,
         name: str = "",
         value: Any = None,
         initial: bool = False,
         final: bool = False,
+        parallel=False,
+        substates=None,
         enter: Any = None,
         exit: Any = None,
     ):
         self.name = name
         self.value = value
+        self.parallel = parallel
+        self.parent: "State" = None
+        self.substates = substates or []
         self._initial = initial
         self._final = final
         self._id: str = ""
@@ -105,6 +132,11 @@ class State:
         self.transitions = TransitionList()
         self.enter = Callbacks().add(enter)
         self.exit = Callbacks().add(exit)
+        self._init_substates()
+
+    def _init_substates(self):
+        for substate in self.substates:
+            substate.parent = self
 
     def __eq__(self, other):
         return (

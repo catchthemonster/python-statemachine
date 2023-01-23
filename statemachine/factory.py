@@ -43,13 +43,13 @@ class StateMachineMetaclass(type):
     def _set_special_states(cls):
         if not cls.states:
             return
-        initials = [s for s in cls.states if s.initial]
+        initials = [s for s in cls.states if s.initial and not s.parent]
         if len(initials) != 1:
             raise InvalidDefinition(
                 _(
                     "There should be one and only one initial state. "
-                    "Your currently have these: {!r}"
-                ).format([s.id for s in initials])
+                    "Your currently have these: {0}"
+                ).format(", ".join(s.id for s in initials))
             )
         cls.initial_state = initials[0]
         cls.final_states = [state for state in cls.states if state.final]
@@ -82,8 +82,9 @@ class StateMachineMetaclass(type):
         if not has_states:
             raise InvalidDefinition(_("There are no states."))
 
-        if not has_events:
-            raise InvalidDefinition(_("There are no events."))
+        # TODO: Validate no events if has nested states
+        # if not has_events:
+        #     raise InvalidDefinition(_("There are no events."))
 
         cls._check_disconnected_state()
 
@@ -144,6 +145,9 @@ class StateMachineMetaclass(type):
         # also register all events associated directly with transitions
         for event in state.transitions.unique_events:
             cls.add_event(event)
+
+        for substate in state.substates:
+            cls.add_state(substate.id, substate)
 
     def add_event(cls, event, transitions=None):
         if transitions is not None:
