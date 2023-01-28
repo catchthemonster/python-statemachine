@@ -23,7 +23,7 @@ def assert_state(s, name, initial=False, final=False, parallel=False, substates=
     assert set(s.substates) == set(substates)
 
 
-class TestNestedDeclarations:
+class TestNestedSyntax:
     def test_capture_constructor_arguments(self, microwave_cls):
         sm = microwave_cls()
 

@@ -11,7 +11,7 @@ from .transition_list import TransitionList
 
 class NestedStateFactory(type):
     def __new__(  # type: ignore [misc]
-        cls, classname, bases, attrs, name=None, initial=False, parallel=False
+        cls, classname, bases, attrs, name=None, **kwargs
     ) -> "State":
 
         if not bases:
@@ -25,7 +25,7 @@ class NestedStateFactory(type):
             if isinstance(value, TransitionList):
                 value.add_event(key)
 
-        return State(name=name, initial=initial, parallel=parallel, substates=substates)
+        return State(name=name, substates=substates, **kwargs)
 
 
 class NestedStateBuilder(metaclass=NestedStateFactory):
