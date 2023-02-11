@@ -40,9 +40,9 @@ class NestedTrafficLightMachine(StateMachine):
     def on_timer(self, event: str, source: State, target: State):
         print(f".. Running {event} from {source.id} to {target.id}")
 
-    def reset_elapsed(self, event: str, time):
+    def reset_elapsed(self, event: str, time: int = 0):
         print(f"entering reset_elapsed from {event} with {time}")
-        self.last_turn = time if time else 0
+        self.last_turn = time
 
     @timer.cond
     def time_is_over(self, time):
@@ -62,3 +62,4 @@ class NestedTrafficLightMachine(StateMachine):
 
 
 sm = NestedTrafficLightMachine()
+sm.send("anything")
