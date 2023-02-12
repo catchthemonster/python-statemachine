@@ -1,6 +1,5 @@
 from copy import deepcopy
 from typing import Any
-from typing import TypeAlias
 
 from .callbacks import Callbacks
 from .exceptions import StateMachineError
@@ -111,7 +110,8 @@ class State:
 
     """
 
-    Builder: TypeAlias = NestedStateBuilder
+    class Builder(metaclass=NestedStateFactory):
+        pass
 
     def __init__(
         self,
