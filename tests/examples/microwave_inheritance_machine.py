@@ -50,7 +50,6 @@ class MicroWave(StateMachine):
                 cooking.to(idle, cond="open.is_active")
                 cooking.to.itself(internal=True, on="increment_timer")
 
-            assert isinstance(on, State)  # so mypy stop complaining
             turn_off = on.to(off)
             turn_on = off.to(on)
             on.to(off, cond="cook_time_is_over")  # eventless transition

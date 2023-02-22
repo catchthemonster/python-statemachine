@@ -27,10 +27,6 @@ class NestedStateFactory(type):
         return State(name=name, substates=substates, **kwargs)
 
 
-class NestedStateBuilder(metaclass=NestedStateFactory):
-    pass
-
-
 class State:
     """
     A State in a :ref:`StateMachine` describes a particular behavior of the machine.
@@ -111,7 +107,29 @@ class State:
     """
 
     class Builder(metaclass=NestedStateFactory):
-        pass
+
+        # Mimic the :ref:`State` public API to help linters discover the result of the Builder
+        # class.
+
+        @classmethod
+        def to(cls, *args: "State", **kwargs) -> "TransitionList":  # pragma: no cover
+            """Create transitions to the given target states.
+
+            .. note: This method is only a type hint for mypy.
+                The actual implementation belongs to the :ref:`State` class.
+            """
+            return TransitionList()
+
+        @classmethod
+        def from_(
+            cls, *args: "State", **kwargs
+        ) -> "TransitionList":  # pragma: no cover
+            """Create transitions from the given target states (reversed).
+
+            .. note: This method is only a type hint for mypy.
+                The actual implementation belongs to the :ref:`State` class.
+            """
+            return TransitionList()
 
     def __init__(
         self,

@@ -27,7 +27,6 @@ class NestedTrafficLightMachine(StateMachine):
 
         ped_countdown = walk.to(wait) | wait.to(stop)
 
-    assert isinstance(red, State)
     timer = green.to(yellow) | yellow.to(red) | red.to(green)
     power_outage = red.blinking.from_()
     power_restored = red.from_()
