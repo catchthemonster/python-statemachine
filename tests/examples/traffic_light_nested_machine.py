@@ -34,7 +34,7 @@ class NestedTrafficLightMachine(StateMachine):
     def __init__(self, seconds_to_turn_state=5, seconds_running=20):
         self.seconds_to_turn_state = seconds_to_turn_state
         self.seconds_running = seconds_running
-        super().__init__(ignore_missing_event=True)
+        super().__init__(allow_event_without_transition=True)
 
     def on_timer(self, event: str, source: State, target: State):
         print(f".. Running {event} from {source.id} to {target.id}")
